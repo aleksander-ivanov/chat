@@ -4,14 +4,16 @@ using Chat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Chat.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190220121049_AddRoomsAndMessages")]
+    partial class AddRoomsAndMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -19,17 +21,17 @@ namespace Chat.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Chat.Data.Entities.ChatMessage", b =>
+            modelBuilder.Entity("Chat.Data.ChatMessage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("CreatedById");
+                    b.Property<string>("CreatedBy");
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("LastModifiedById");
+                    b.Property<string>("LastModifiedBy");
 
                     b.Property<DateTime?>("LastModifiedDate");
 
@@ -37,26 +39,28 @@ namespace Chat.Data.Migrations
 
                     b.Property<string>("Text");
 
+                    b.Property<string>("UserId");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Chat.Data.Entities.ConversationRoom", b =>
+            modelBuilder.Entity("Chat.Data.ConversationRoom", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("CreatedById");
+                    b.Property<string>("CreatedBy");
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("LastModifiedById");
+                    b.Property<string>("LastModifiedBy");
 
                     b.Property<DateTime?>("LastModifiedDate");
 
@@ -64,14 +68,10 @@ namespace Chat.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("LastModifiedById");
-
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("Chat.Data.Entities.UserRoom", b =>
+            modelBuilder.Entity("Chat.Data.UserRoom", b =>
                 {
                     b.Property<string>("UserId");
 
@@ -254,44 +254,33 @@ namespace Chat.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Chat.Data.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("Chat.Data.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
-            modelBuilder.Entity("Chat.Data.Entities.ChatMessage", b =>
+            modelBuilder.Entity("Chat.Data.ChatMessage", b =>
                 {
-                    b.HasOne("Chat.Data.Entities.ApplicationUser", "CreatedBy")
-                        .WithMany("Messages")
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("Chat.Data.Entities.ConversationRoom", "Room")
+                    b.HasOne("Chat.Data.ConversationRoom", "Room")
                         .WithMany("Messages")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Chat.Data.ApplicationUser", "User")
+                        .WithMany("Messages")
+                        .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("Chat.Data.Entities.ConversationRoom", b =>
+            modelBuilder.Entity("Chat.Data.UserRoom", b =>
                 {
-                    b.HasOne("Chat.Data.Entities.ApplicationUser", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById");
-
-                    b.HasOne("Chat.Data.Entities.ApplicationUser", "LastModifiedBy")
-                        .WithMany()
-                        .HasForeignKey("LastModifiedById");
-                });
-
-            modelBuilder.Entity("Chat.Data.Entities.UserRoom", b =>
-                {
-                    b.HasOne("Chat.Data.Entities.ConversationRoom", "Room")
+                    b.HasOne("Chat.Data.ConversationRoom", "Room")
                         .WithMany("UserRooms")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Chat.Data.Entities.ApplicationUser", "User")
+                    b.HasOne("Chat.Data.ApplicationUser", "User")
                         .WithMany("UserRooms")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

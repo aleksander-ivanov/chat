@@ -1,0 +1,40 @@
+﻿@page
+@model Chat.Pages.MessangerModel
+
+@{
+    ViewData["Title"] = "Messanger";
+}
+
+<h1>@Html.DisplayFor(model => model.Room.RoomName)</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        @*<form method="post">*@
+        <div class="form-group">
+            <input type="hidden" asp-for="Room.Id" />
+            @*<input type="hidden" asp-for="SenderId" />*@
+            <textarea rows="5" id="messageInput" name="text" class="form-control"></textarea>
+        </div>
+            <div class="form-group">
+                <input type="button" id="sendButton" value="Send" class="btn btn-primary" />
+            </div>
+        @*</form>*@
+    </div>
+</div>
+
+<div id="messagesList">
+    @foreach (var message in Model.Messages)
+    {
+        <div class="row">
+            <div class="col-md-8" style="word-wrap: break-word">
+                <div style="font-style: oblique">@message.Text</div>
+                <div style="font-size: x-small">@message.CreatedBy.Email</div>
+                <div style="font-size: x-small">@message.CreatedDate</div>
+                <hr />
+            </div>
+        </div>
+    }
+    </div>
+
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>

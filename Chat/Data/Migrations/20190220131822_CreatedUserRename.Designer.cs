@@ -4,14 +4,16 @@ using Chat.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Chat.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190220131822_CreatedUserRename")]
+    partial class CreatedUserRename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,11 +39,13 @@ namespace Chat.Data.Migrations
 
                     b.Property<string>("Text");
 
+                    b.Property<string>("UserId");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
-
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -263,14 +267,14 @@ namespace Chat.Data.Migrations
 
             modelBuilder.Entity("Chat.Data.Entities.ChatMessage", b =>
                 {
-                    b.HasOne("Chat.Data.Entities.ApplicationUser", "CreatedBy")
-                        .WithMany("Messages")
-                        .HasForeignKey("CreatedById");
-
                     b.HasOne("Chat.Data.Entities.ConversationRoom", "Room")
                         .WithMany("Messages")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Chat.Data.Entities.ApplicationUser", "User")
+                        .WithMany("Messages")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Chat.Data.Entities.ConversationRoom", b =>

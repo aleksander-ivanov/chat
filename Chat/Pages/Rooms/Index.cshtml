@@ -1,0 +1,48 @@
+﻿@page
+@model Chat.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Rooms list</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+    <a class="nav-link text-dark" asp-area="" asp-page="/Rooms/Create">Create New Room</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].RoomName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].CreatedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].CreatedDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Room) {
+        <tr>
+            <td>
+                <a asp-page="/Messanger" asp-route-roomId="@item.Id">@Html.DisplayFor(modelItem => item.RoomName)</a>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedBy.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDate)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

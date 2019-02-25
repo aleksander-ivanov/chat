@@ -1,18 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Chat.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Chat.Hubs;
+using Chat.Domain;
+using Chat.Services;
+using Chat.Data.Entities;
+using System;
 
 namespace Chat
 {
@@ -38,12 +38,25 @@ namespace Chat
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddDefaultIdentity<ApplicationUser>()
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(options => options.AddPolicy("AllowAll", p => p.WithOrigins("*")//AllowAnyOrigin()
+                                                                    .AllowAnyMethod()
+                                                                    .AllowCredentials()
+                                                                     .AllowAnyHeader()));
+            services.AddMvc().AddRazorPagesOptions(options =>
+            {
+                options.Conventions.AddPageRoute("/Rooms/Index", "");
+            })
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSignalR(hubOptions => {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(3);
+            });//.AddAzureSignalR();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IUserResolver, UserResolverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,8 +79,14 @@ namespace Chat
             app.UseCookiePolicy();
 
             app.UseAuthentication();
-
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chatHub");
+            });
+            app.UseCors("AllowAll");
             app.UseMvc();
+
+            SeedData.Initialize(app.ApplicationServices);
         }
     }
 }
